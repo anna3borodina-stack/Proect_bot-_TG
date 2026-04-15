@@ -12,6 +12,7 @@ class Settings:
     manager_chat_id: int | None
     privacy_policy_url: str
     store_url: str
+    bot_public_url: str
 
 
 def _normalize_http_url(raw: str) -> str:
@@ -39,12 +40,14 @@ def load_settings() -> Settings:
     mgr = _parse_manager_chat_id(os.getenv("MANAGER_CHAT_ID"))
     privacy = os.getenv("PRIVACY_POLICY_URL", "").strip()
     store = _normalize_http_url(os.getenv("STORE_URL", ""))
+    bot_public = _normalize_http_url(os.getenv("TELEGRAM_BOT_PUBLIC_URL", ""))
 
     return Settings(
         telegram_bot_token=token,
         manager_chat_id=mgr,
         privacy_policy_url=privacy,
         store_url=store,
+        bot_public_url=bot_public,
     )
 
 

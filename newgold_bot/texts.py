@@ -137,7 +137,7 @@ def _trim_url(url: str | None) -> str:
     return url.strip() if url else ""
 
 
-def start_welcome(store_url: str | None) -> str:
+def start_welcome(store_url: str | None, bot_public_url: str | None = None) -> str:
     """Текст /start до согласия с политикой."""
     base = (
         "Здравствуйте! Вы в помощнике бренда NEWGOLD — ювелирные украшения ✨\n\n"
@@ -149,10 +149,13 @@ def start_welcome(store_url: str | None) -> str:
     u = _trim_url(store_url)
     if u:
         base += f"\n\n🛒 Интернет-магазин: {u}"
+    b = _trim_url(bot_public_url)
+    if b:
+        base += f"\n🤖 Ссылка на этого бота: {b}"
     return base
 
 
-def after_consent(store_url: str | None) -> str:
+def after_consent(store_url: str | None, bot_public_url: str | None = None) -> str:
     """Текст сразу после согласия."""
     lines = [
         "Спасибо! Выберите раздел в меню ниже или пройдите консультацию — "
@@ -165,4 +168,16 @@ def after_consent(store_url: str | None) -> str:
         "\n\nБыстрый переход на витрину: кнопка «🌐 Сайт» или команда /site."
         "\nКоманды: /help — справка, /manager — заявка, /cancel — выход из сценария."
     )
+    b = _trim_url(bot_public_url)
+    if b:
+        lines.append(f"\n\nПоделиться ботом: {b}")
     return "".join(lines)
+
+
+def help_message(bot_public_url: str | None = None) -> str:
+    """Справка /help с опциональной ссылкой на бота (t.me/...)."""
+    base = MSG_HELP
+    b = _trim_url(bot_public_url)
+    if b:
+        base += f"\n\n🤖 <b>Ссылка на этого бота</b> (можно переслать знакомым):\n{b}"
+    return base

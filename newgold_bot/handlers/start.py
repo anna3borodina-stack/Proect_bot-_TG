@@ -37,7 +37,7 @@ async def cmd_start(message: Message, state: FSMContext) -> None:
         return
 
     await message.answer(
-        texts.start_welcome(settings.store_url or None),
+        texts.start_welcome(settings.store_url or None, settings.bot_public_url or None),
         reply_markup=_privacy_keyboard(settings.privacy_policy_url),
     )
 
@@ -51,7 +51,7 @@ async def consent_yes(callback: CallbackQuery) -> None:
         settings = get_app_settings()
         await callback.message.edit_reply_markup(reply_markup=None)
         await callback.message.answer(
-            texts.after_consent(settings.store_url or None),
+            texts.after_consent(settings.store_url or None, settings.bot_public_url or None),
             reply_markup=main_menu_reply(),
         )
 
@@ -68,4 +68,8 @@ async def consent_no(callback: CallbackQuery) -> None:
 
 @router.message(Command("help"))
 async def cmd_help(message: Message) -> None:
-    await message.answer(texts.MSG_HELP, parse_mode="HTML")
+    settings = get_app_settings()
+    await message.answer(
+        texts.help_message(settings.bot_public_url or None),
+        parse_mode="HTML",
+    )
