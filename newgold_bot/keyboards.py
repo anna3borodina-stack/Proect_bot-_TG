@@ -16,8 +16,18 @@ def main_menu_reply() -> ReplyKeyboardMarkup:
                 KeyboardButton(text=texts.BTN_STONES_GOLD),
                 KeyboardButton(text=texts.BTN_MANAGER),
             ],
+            [KeyboardButton(text=texts.BTN_SITE)],
         ],
         resize_keyboard=True,
+    )
+
+
+def site_url_inline(url: str) -> InlineKeyboardMarkup:
+    """Кнопка-ссылка на витрину (url должен быть с http/https)."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🌐 Перейти на сайт NEWGOLD", url=url)],
+        ]
     )
 
 

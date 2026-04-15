@@ -23,6 +23,7 @@ from newgold_bot.keyboards import (
     consult_review_kb,
     consult_stones_kb,
     main_menu_reply,
+    site_url_inline,
 )
 from newgold_bot.scenario import (
     KEY_BUDGET,
@@ -97,6 +98,23 @@ async def _send_to_manager_chat(bot, chat_id: int, text: str) -> bool:
         return False
 
 
+async def send_store_link(message: Message) -> None:
+    """Сообщение с кнопкой перехода на витрину (STORE_URL)."""
+    if not message.from_user or not has_consent(message.from_user.id):
+        await message.answer(texts.MSG_NEED_PRIVACY_FIRST)
+        return
+    settings = get_app_settings()
+    url = (settings.store_url or "").strip()
+    if not url:
+        await message.answer(texts.MSG_STORE_NO_URL, reply_markup=main_menu_reply())
+        return
+    await message.answer(
+        texts.MSG_STORE_OPEN,
+        parse_mode="HTML",
+        reply_markup=site_url_inline(url),
+    )
+
+
 async def open_manager_lead(message: Message, state: FSMContext) -> None:
     """Заявка менеджеру: выходим из консультации и ждём текст."""
     if not message.from_user or not has_consent(message.from_user.id):
@@ -149,6 +167,16 @@ async def menu_stones_gold(message: Message) -> None:
         await message.answer(texts.MSG_NEED_PRIVACY_FIRST)
         return
     await message.answer(texts.MSG_STONES_GOLD_INFO, parse_mode="HTML", reply_markup=main_menu_reply())
+
+
+@router.message(Command("site"), F.chat.type == ChatType.PRIVATE)
+async def cmd_site(message: Message) -> None:
+    await send_store_link(message)
+
+
+@router.message(F.chat.type == ChatType.PRIVATE, F.text == texts.BTN_SITE)
+async def menu_site(message: Message) -> None:
+    await send_store_link(message)
 
 
 # --- Callbacks консультации ---
@@ -424,6 +452,9 @@ async def cmd_manager(message: Message, state: FSMContext) -> None:
 async def manager_details(message: Message, state: FSMContext) -> None:
     if message.text and message.text.strip() == texts.BTN_MANAGER:
         await message.answer("Напишите, пожалуйста, обычным текстом, чем мы можем помочь — не кнопкой.")
+        return
+    if message.text and message.text.strip() == texts.BTN_SITE:
+        await send_store_link(message)
         return
     settings = get_app_settings()
     chat_id = settings.manager_chat_id
