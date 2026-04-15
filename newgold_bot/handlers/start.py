@@ -1,3 +1,5 @@
+import html
+
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
@@ -73,3 +75,28 @@ async def cmd_help(message: Message) -> None:
         texts.help_message(settings.bot_public_url or None),
         parse_mode="HTML",
     )
+
+
+@router.message(Command("chatid"))
+async def cmd_chatid(message: Message) -> None:
+    """Показать ID текущего чата — для заполнения MANAGER_CHAT_ID в группе менеджеров."""
+    cid = message.chat.id
+    ctype = message.chat.type
+    title = message.chat.title
+    parts = [
+        "<b>ID этого чата</b> (вставьте в <code>MANAGER_CHAT_ID</code> в <code>.env</code>):",
+        f"<code>{cid}</code>",
+        f"Тип: <code>{ctype}</code>",
+    ]
+    if title:
+        parts.append(f"Название: {html.escape(title)}")
+    if ctype == "private":
+        parts.append("")
+        parts.append(
+            "Это личный чат с ботом. Чтобы получить ID <b>группы</b> менеджеров: "
+            "добавьте бота в группу и отправьте <code>/chatid</code> уже <b>в группе</b>."
+        )
+    else:
+        parts.append("")
+        parts.append("Скопируйте число (с минусом, если есть) в MANAGER_CHAT_ID и перезапустите бота.")
+    await message.answer("\n".join(parts), parse_mode="HTML")
