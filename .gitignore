@@ -1,0 +1,26 @@
+# Секреты и локальная конфигурация (никогда не коммитить)
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Node (если выберете JS/TS)
+node_modules/
+
+# IDE и ОС
+.idea/
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
