@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import sys
+import traceback
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -30,6 +31,7 @@ async def main() -> None:
         sys.exit(1)
 
     set_app_settings(settings)
+    logger.info("Настройки загружены из .env (корень проекта).")
 
     bot = Bot(
         token=settings.telegram_bot_token,
@@ -38,11 +40,21 @@ async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(setup_routers())
 
-    # Иначе при ранее включённом webhook long polling не получает сообщения.
-    await bot.delete_webhook(drop_pending_updates=False)
-    logger.info("Бот NEWGOLD запущен (long polling).")
+    me = await bot.get_me()
+    logger.info("Токен верный, бот: @%s (id=%s)", me.username or "—", me.id)
+
+    # Сброс webhook и очереди — иначе long polling может не получать апдейты.
+    await bot.delete_webhook(drop_pending_updates=True)
+    logger.info("Webhook сброшен, ожидание сообщений (long polling)...")
+
     await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Остановка по Ctrl+C.")
+    except Exception:
+        logger.error("Фатальная ошибка:\n%s", traceback.format_exc())
+        sys.exit(1)
