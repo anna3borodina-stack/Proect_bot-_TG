@@ -38,6 +38,8 @@ async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(setup_routers())
 
+    # Иначе при ранее включённом webhook long polling не получает сообщения.
+    await bot.delete_webhook(drop_pending_updates=False)
     logger.info("Бот NEWGOLD запущен (long polling).")
     await dp.start_polling(bot)
 
